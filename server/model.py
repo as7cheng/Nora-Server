@@ -2,22 +2,22 @@
 This is the file to declare data models and schemas
 """
 
-from initapp import db, mars
+from initapp import DB, MA
 
-class Business(db.Model):
+class Business(DB.Model):
     """
     Class of business data entry
     """
-    bid = db.Column(db.Text, primary_key=True)
-    b_name = db.Column(db.Text, nullable=False)
-    url = db.Column(db.Text)
-    rating = db.Column(db.Numeric)
-    addr = db.Column(db.Text)
-    phone = db.Column(db.Text)
-    timestamp = db.Column(db.Text)
+    bid = DB.Column(DB.Text, primary_key=True)
+    b_name = DB.Column(DB.Text, nullable=False)
+    url = DB.Column(DB.Text)
+    rating = DB.Column(DB.Numeric)
+    addr = DB.Column(DB.Text)
+    phone = DB.Column(DB.Text)
+    timestamp = DB.Column(DB.Text)
 
 
-class BusinessSchema(mars.SQLAlchemyAutoSchema):
+class BusinessSchema(MA.SQLAlchemyAutoSchema):
     """
     Schema of Business data entry
     """

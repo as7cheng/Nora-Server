@@ -4,10 +4,10 @@ File to create and start the flask app
 
 import json
 from flask import Flask, jsonify
-from initapp import cors, db, mars, migr
+from initapp import CORS, DB, MIGR, MA
 from model import BusinessSchema, Business
 
-app = Flask(__name__)
+APP = Flask(__name__)
 
 # Open the file contains DB info
 with open('security.json', 'r') as f:
@@ -17,20 +17,20 @@ with open('security.json', 'r') as f:
     DB_PSW = DATA['DB_PSW']
 
 # Iinitialization the flask app
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DB_USER}:{DB_PSW}@{DB_URL}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-cors.init_app(app)
-db.init_app(app)
-mars.init_app(app)
-migr.init_app(app, db)
+APP.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DB_USER}:{DB_PSW}@{DB_URL}"
+APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+CORS.init_app(APP)
+DB.init_app(APP)
+MA.init_app(APP)
+MIGR.init_app(APP, DB)
 
 # Create the db
-with app.app_context():
-    db.create_all()
+with APP.app_context():
+    DB.create_all()
 
 BUSINESS = BusinessSchema(many=True)
 
-@app.route('/', methods=['GET'])
+@APP.route('/', methods=['GET'])
 def index():
     """
     Path of homepage
@@ -38,10 +38,13 @@ def index():
     res = BUSINESS.dump(Business.query.all())
     return jsonify(res)
 
-@app.route('/test', methods=['GET'])
+@APP.route('/test', methods=['GET'])
 def test():
+    """
+    Function to test
+    """
     res = BUSINESS.dump(Business.query.with_entities(Business.bid))
     return jsonify(res)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port='8765')
+    APP.run(debug=True, host='0.0.0.0', port='8765')
