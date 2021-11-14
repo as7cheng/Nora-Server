@@ -1,5 +1,5 @@
 """
-This is the file to declare data models and schemas
+File to declare data models and schemas
 """
 
 from initapp import DB, MA
@@ -8,14 +8,19 @@ class Business(DB.Model):
     """
     Class of business data entry
     """
-    bid = DB.Column(DB.Text, primary_key=True)
-    b_name = DB.Column(DB.Text, nullable=False)
-    url = DB.Column(DB.Text)
+    id = DB.Column(DB.Text, primary_key=True)
+    name = DB.Column(DB.Text, nullable=False)
+    image = DB.Column(DB.Text)
+    tags = DB.Column(DB.ARRAY(DB.Text))
     rating = DB.Column(DB.Numeric)
+    transaction = DB.Column(DB.ARRAY(DB.Text))
+    price = DB.Column(DB.Text)
     addr = DB.Column(DB.Text)
+    city = DB.Column(DB.Text)
+    state = DB.Column(DB.Text)
+    zip_code = DB.Column(DB.Text)
     phone = DB.Column(DB.Text)
     timestamp = DB.Column(DB.Text)
-
 
 class BusinessSchema(MA.SQLAlchemyAutoSchema):
     """
