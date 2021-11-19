@@ -3,7 +3,7 @@ File to create and start the flask app
 """
 
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from initapp import CORS, DB, MIGR, MA
 from model import BusinessSchema, Business
 
@@ -19,7 +19,8 @@ with open('security.json', 'r') as f:
     DB_PSW = DATA['DB_PSW']
 
 # Iinitialization the flask app
-APP.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DB_USER}:{DB_PSW}@{DB_URL}:{DB_PORT}/{DB_NAME}"
+SQL_URL = f"postgresql://{DB_USER}:{DB_PSW}@{DB_URL}:{DB_PORT}/{DB_NAME}"
+APP.config['SQLALCHEMY_DATABASE_URI'] = SQL_URL
 APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS.init_app(APP)
 DB.init_app(APP)
@@ -39,6 +40,16 @@ def index():
     """
     res = BUSINESS.dump(Business.query.all())
     return jsonify(res)
+
+@APP.route('/dev', methods=['GET'])
+def dev():
+    """
+    Function to haddle query with parameters
+    """
+    city = request.args.get('city')
+    res = BUSINESS.dump(Business.query.filter_by(city=city))
+    return jsonify(res)
+
 
 @APP.route('/test', methods=['GET'])
 def test():
