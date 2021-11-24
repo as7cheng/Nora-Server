@@ -33,6 +33,7 @@ with APP.app_context():
 
 BUSINESS = BusinessSchema(many=True)
 
+
 @APP.route('/', methods=['GET'])
 def index():
     """
@@ -41,14 +42,51 @@ def index():
     res = BUSINESS.dump(Business.query.all())
     return jsonify(res)
 
-@APP.route('/dev', methods=['GET'])
-def dev():
+
+@APP.route('/top', methods=['GET'])
+def top() -> list:
     """
     Function to haddle query with parameters
     """
-    city = request.args.get('city')
-    res = BUSINESS.dump(Business.query.filter_by(city=city))
+    term = request.args.get('term')
+    print(term)
+    term = capitalize_first(term)
+    print(term)
+    syntax = (
+        f"select city, state, round(avg(rating), 2) as "
+        f"score FROM business where '{term}'=term "
+        f"group by city, state order by score desc limit 3;"
+    )
+    result = DB.session.execute(syntax)
+    res = [serialize_message(data) for data in result]
     return jsonify(res)
+
+@APP.route('/rank', methods=['GET'])
+def rank() -> list:
+    term = request.args.get('term')
+    term = capitalize_first(term)
+    syntax = (
+        f"select city, state, (count(*)/city_population * 1000) "
+        f"as score from business where term='{term}' group by city, "
+        f"state, city_population order by score desc;"
+
+    )
+    result = DB.session.execute(syntax)
+    res = [serialize_message(data) for data in result]
+    return jsonify(res)
+
+
+
+
+def serialize_message(data) -> json:
+    """
+    Helper function to serialize query object
+    """
+    return {
+        "city": data.city,
+        "state": data.state,
+        "score": data.score
+    }
 
 
 @APP.route('/test', methods=['GET'])
@@ -56,8 +94,21 @@ def test():
     """
     Function to test
     """
-    res = BUSINESS.dump(Business.query.with_entities(Business.id))
+    city = request.args.get('city')
+    print(city)
+    city = capitalize_first(city)
+    print(city)
+    res = BUSINESS.dump(Business.query.filter_by(city=city))
     return jsonify(res)
+
+
+def capitalize_first(words):
+    """
+    Helper function to capitalize the first letter for each word
+    """
+    word_list = [i[0].upper() + i[1:] for i in words.split(' ')]
+    return ' '.join(word_list)
+
 
 if __name__ == '__main__':
     APP.run(debug=True, host='0.0.0.0', port=8765)

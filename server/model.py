@@ -11,6 +11,7 @@ class Business(DB.Model):
     id = DB.Column(DB.Text, primary_key=True)
     name = DB.Column(DB.Text, nullable=False)
     image = DB.Column(DB.Text)
+    url = DB.Column(DB.Text)
     tags = DB.Column(DB.ARRAY(DB.Text))
     rating = DB.Column(DB.Numeric)
     transaction = DB.Column(DB.ARRAY(DB.Text))
@@ -21,6 +22,9 @@ class Business(DB.Model):
     zip_code = DB.Column(DB.Text)
     phone = DB.Column(DB.Text)
     timestamp = DB.Column(DB.Text)
+    metropolitan = DB.Column(DB.Text)
+    term = DB.Column(DB.Text)
+    city_population = DB.Column(DB.Text)
 
 class BusinessSchema(MA.SQLAlchemyAutoSchema):
     """
