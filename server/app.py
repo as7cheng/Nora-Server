@@ -53,12 +53,12 @@ def sample():
         cities = [capitalize_first(city) for city in args['city']]
         terms = [capitalize_first(term) for term in args['term']]
         res = BUSINESS.dump(Business.query.filter(
-            Business.city.in_(cities),
+            Business.metropolitan.in_(cities),
             Business.term.in_(terms)))
     elif 'city' in args:
         cities = [capitalize_first(city) for city in args['city']]
         res = BUSINESS.dump(Business.query.filter(
-            Business.city.in_(cities)))
+            Business.metropolitan.in_(cities)))
     elif 'term' in args:
         terms = [capitalize_first(term) for term in args['term']]
         res = BUSINESS.dump(Business.query.filter(
