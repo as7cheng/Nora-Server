@@ -39,7 +39,32 @@ def index():
     """
     Path of homepage
     """
-    res = BUSINESS.dump(Business.query.all())
+    return "Welcom to Nora's restaurants recommendation"
+
+
+@APP.route('/sample', methods=['GET'])
+def sample():
+    """
+    Function to return basic quries filter by cusine and/or city
+    """
+    args = request.args.to_dict(flat=False)
+
+    if 'city' in args and 'term' in args:
+        cities = [capitalize_first(city) for city in args['city']]
+        terms = [capitalize_first(term) for term in args['term']]
+        res = BUSINESS.dump(Business.query.filter(
+            Business.city.in_(cities),
+            Business.term.in_(terms)))
+    elif 'city' in args:
+        cities = [capitalize_first(city) for city in args['city']]
+        res = BUSINESS.dump(Business.query.filter(
+            Business.city.in_(cities)))
+    elif 'term' in args:
+        terms = [capitalize_first(term) for term in args['term']]
+        res = BUSINESS.dump(Business.query.filter(
+            Business.term.in_(terms)))
+    else:
+        res = BUSINESS.dump(Business.query.all())
     return jsonify(res)
 
 
@@ -61,8 +86,12 @@ def top() -> list:
     res = [serialize_message(data) for data in result]
     return jsonify(res)
 
+
 @APP.route('/rank', methods=['GET'])
 def rank() -> list:
+    """
+    Function to return the ranking quied by term
+    """
     term = request.args.get('term')
     term = capitalize_first(term)
     syntax = (
@@ -76,8 +105,6 @@ def rank() -> list:
     return jsonify(res)
 
 
-
-
 def serialize_message(data) -> json:
     """
     Helper function to serialize query object
@@ -87,6 +114,14 @@ def serialize_message(data) -> json:
         "state": data.state,
         "score": data.score
     }
+
+
+def capitalize_first(words):
+    """
+    Helper function to capitalize the first letter for each word
+    """
+    word_list = [i[0].upper() + i[1:] for i in words.split(' ')]
+    return ' '.join(word_list)
 
 
 @APP.route('/test', methods=['GET'])
@@ -100,14 +135,6 @@ def test():
     print(city)
     res = BUSINESS.dump(Business.query.filter_by(city=city))
     return jsonify(res)
-
-
-def capitalize_first(words):
-    """
-    Helper function to capitalize the first letter for each word
-    """
-    word_list = [i[0].upper() + i[1:] for i in words.split(' ')]
-    return ' '.join(word_list)
 
 
 if __name__ == '__main__':
