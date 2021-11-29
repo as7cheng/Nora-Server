@@ -95,9 +95,9 @@ def rank() -> list:
     term = request.args.get('term')
     term = capitalize_first(term)
     syntax = (
-        f"select city, state, (count(*)/city_population * 1000) "
+        f"select city, state, round (city_population / count(*), 0) "
         f"as score from business where term='{term}' group by city, "
-        f"state, city_population order by score desc;"
+        f"state, city_population order by score limit 5;"
 
     )
     result = DB.session.execute(syntax)
