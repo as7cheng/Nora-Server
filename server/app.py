@@ -10,7 +10,7 @@ from model import BusinessSchema, Business
 APP = Flask(__name__)
 
 # Open the file contains DB info
-with open('security.json', 'r') as f:
+with open('security.json', 'rb') as f:
     DATA = json.load(f)
     DB_URL = DATA['DB_URL']
     DB_PORT = DATA['DB_PORT']
@@ -47,7 +47,11 @@ def sample():
     """
     Function to return basic quries filter by cusine and/or city
     """
-    args = request.args.to_dict(flat=False)
+    request_args = request.args.to_dict(flat=False)
+    print(request_args)
+    args = {k : v for k, v in request_args.items()
+            if k == 'term' or k == 'city' and list(filter(None, v)) != []}
+    print(args)
 
     if 'city' in args and 'term' in args:
         cities = [capitalize_first(city) for city in args['city']]
@@ -65,34 +69,40 @@ def sample():
             Business.term.in_(terms)))
     else:
         res = BUSINESS.dump(Business.query.all())
+    print(len(res))
     return jsonify(res)
 
 
 @APP.route('/top', methods=['GET'])
-def top() -> list:
+def top():
     """
     Function to haddle query with parameters
     """
     term = request.args.get('term')
     print(term)
+    if term is None or term == '':
+        return jsonify([])
     term = capitalize_first(term)
     print(term)
     syntax = (
-        f"select city, state, round(avg(rating), 2) as "
+        f"select metropolitan, state, round(avg(rating), 2) as "
         f"score FROM business where '{term}'=term "
-        f"group by city, state order by score desc limit 3;"
+        f"group by metropolitan, state order by score desc limit 3;"
     )
     result = DB.session.execute(syntax)
-    res = [serialize_message(data) for data in result]
+    res = [serialize_message(data, 'metropolitan') for data in result]
+    print(type(jsonify(res)))
     return jsonify(res)
 
 
 @APP.route('/rank', methods=['GET'])
-def rank() -> list:
+def rank():
     """
     Function to return the ranking quied by term
     """
     term = request.args.get('term')
+    if term is None or term == '':
+        return jsonify([])
     term = capitalize_first(term)
     syntax = (
         f"select city, state, round (city_population / count(*), 0) "
@@ -101,20 +111,27 @@ def rank() -> list:
 
     )
     result = DB.session.execute(syntax)
-    res = [serialize_message(data) for data in result]
+    res = [serialize_message(data, 'city') for data in result]
     return jsonify(res)
 
 
-def serialize_message(data) -> json:
+def serialize_message(data, key) -> json:
     """
     Helper function to serialize query object
     """
-    return {
-        "city": data.city,
-        "state": data.state,
-        "score": data.score
-    }
-
+    if key == 'metropolitan':
+        return {
+            "metropolitan": data.metropolitan,
+            "state": data.state,
+            "score": data.score
+        }
+    if key == 'city':
+        return {
+            "city": data.city,
+            "state": data.state,
+            "score": data.score
+        }
+    return {}
 
 def capitalize_first(words):
     """
