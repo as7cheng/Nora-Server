@@ -49,10 +49,21 @@ def sample():
     """
     request_args = request.args.to_dict(flat=False)
     print(request_args)
-    args = {k : v for k, v in request_args.items()
-            if k == 'term' or k == 'city' and list(filter(None, v)) != []}
+    # First, pick out the term and city parameters
+    args = {k : v for k, v in request_args.items() if k in ['term', 'city']}
     print(args)
-
+    # Then, prune the parameter lists -> remove all empty strings
+    if 'term' in args:
+        args['term'] = list(filter(None, args['term']))
+        print(args['term'])
+        if args['term'] == []:
+            del args['term']
+    if 'city' in args:
+        args['city'] = list(filter(None, args['city']))
+        print(args['city'])
+        if args['city'] == []:
+            del args['city']
+    # Now, deal with the args
     if 'city' in args and 'term' in args:
         cities = [capitalize_first(city) for city in args['city']]
         terms = [capitalize_first(term) for term in args['term']]
@@ -76,7 +87,8 @@ def sample():
 @APP.route('/top', methods=['GET'])
 def top():
     """
-    Function to haddle query with parameters
+    Function to haddle query with parameter term, return the top 3
+    metropolitans with heighest average rating on parameter term.
     """
     term = request.args.get('term')
     print(term)
@@ -98,7 +110,7 @@ def top():
 @APP.route('/rank', methods=['GET'])
 def rank():
     """
-    Function to return the ranking quied by term
+    Function to return the ranking queried by term
     """
     term = request.args.get('term')
     if term is None or term == '':
@@ -115,7 +127,7 @@ def rank():
     return jsonify(res)
 
 
-def serialize_message(data, key) -> json:
+def serialize_message(data, key):
     """
     Helper function to serialize query object
     """
