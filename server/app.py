@@ -97,9 +97,9 @@ def top():
     term = capitalize_first(term)
     print(term)
     syntax = (
-        f"select metropolitan, state, round(avg(rating), 2) as "
+        f"select metropolitan, round(avg(rating), 2) as "
         f"score FROM business where '{term}'=term "
-        f"group by metropolitan, state order by score desc limit 3;"
+        f"group by metropolitan order by score desc limit 3;"
     )
     result = DB.session.execute(syntax)
     res = [serialize_message(data, 'metropolitan') for data in result]
@@ -134,7 +134,6 @@ def serialize_message(data, key):
     if key == 'metropolitan':
         return {
             "metropolitan": data.metropolitan,
-            "state": data.state,
             "score": data.score
         }
     if key == 'city':
